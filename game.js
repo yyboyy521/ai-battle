@@ -3177,17 +3177,24 @@
     if (!pad) return;
     const buttons = [...pad.querySelectorAll("[data-touch]")];
 
-    /* 判定是否真正的触屏设备。
-       单看 maxTouchPoints 不可靠——部分桌面浏览器（含无头 Edge）会报告非 0；
-       单看 pointer:coarse 也不可靠——部分移动端环境会报 fine。
-       可靠做法：看**物理屏幕**的短边尺寸（不受窗口大小影响）：
-       手机/平板短边 ≤ 900 CSS px 才算触屏设备，桌面显示器短边通常 ≥ 900。 */
+    /* 触屏判定：只用"媒体查询说的粗指针"这一个可靠信号。
+       注意：不要用 navigator.maxTouchPoints 或 screen 尺寸做判断——
+       无头浏览器 / 部分桌面浏览器会上报 maxTouchPoints=10、screen=800×600，
+       把电脑端误判成手机（已经踩过两次）。 */
     const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
-    const hasTouchApi = (navigator.maxTouchPoints || 0) > 0 || "ontouchstart" in window;
-    const screenShortSide = Math.min(window.screen?.width || 9999, window.screen?.height || 9999);
-    const smallScreen = screenShortSide <= 900;
-    const isTouchDevice = hasTouchApi && (coarsePointer || smallScreen);
+    const isTouchDevice = coarsePointer;
     document.body.classList.toggle("is-touch", isTouchDevice);
+
+    /* 兜底：如果媒体查询不准，等真实触摸事件发生时再补上。
+       鼠标设备永远不会触发 touchstart，所以不会误伤电脑端。 */
+    if (!isTouchDevice) {
+      const enableOnFirstTouch = () => {
+        document.body.classList.add("is-touch");
+        document.body.classList.toggle("is-portrait", window.innerHeight > window.innerWidth);
+        window.removeEventListener("touchstart", enableOnFirstTouch, true);
+      };
+      window.addEventListener("touchstart", enableOnFirstTouch, { capture: true, passive: true });
+    }
 
     /* 竖屏检测：竖屏时收起触屏操作台（横屏才是正常游玩姿态） */
     const syncOrientation = () => {
