@@ -1,0 +1,25 @@
+# 部署到 GitHub Pages 时忽略的内容
+# 只发布游戏本体：index.html / style.css / game.js / assets / 赞赏码.jpg
+
+# 运行时与工具（体积大、含本机路径）
+runtime/
+cloudflared.exe
+launcher-public.js
+server.js
+*.bat
+
+# 日志与运行时生成文件
+*.log
+公网地址.txt
+公网线路.txt
+
+# 原始素材与文档（不需要公开发布）
+ai character/
+*.md
+联机说明.txt
+THIRD_PARTY_NOTICES.txt
+mobile-controls.html
+
+# 系统文件
+Thumbs.db
+.DS_Store

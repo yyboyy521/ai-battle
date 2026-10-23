@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#070b14">
+  <title>AI 娘 · 破界咖啡厅</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23070b14'/%3E%3Cpath d='M18 44 32 16l14 28-14-8z' fill='%2363d9ff'/%3E%3Ccircle cx='32' cy='36' r='4' fill='%23ffd36d'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page-atmosphere" aria-hidden="true">
+    <span class="atmo-orb atmo-orb-a"></span>
+    <span class="atmo-orb atmo-orb-b"></span>
+    <span class="atmo-grid"></span>
+    <span class="atmo-noise"></span>
+  </div>
+
+  <!-- ══════════════════ 手机竖屏提示 ══════════════════ -->
+  <div class="rotate-overlay" id="rotateOverlay" aria-hidden="true">
+    <div class="rotate-card">
+      <div class="rotate-icon" aria-hidden="true">▭</div>
+      <h2>请横屏游玩</h2>
+      <p>把手机横过来，才能看到完整的战场与操作按键。</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════ 选人界面 ══════════════════ -->
+  <section class="screen screen-select is-active" id="selectScreen" aria-label="选择出战 AI">
+    <div class="author-watermark" aria-hidden="true">
+      <span class="author-watermark-name">企鹅先生</span>
+      <span class="author-watermark-en">MR. PENGUIN / CREATOR</span>
+      <em class="author-watermark-quote">“慢慢做，也能做出喜欢的世界。”</em>
+    </div>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <i></i><i></i><i></i>
+        </span>
+        <div class="brand-copy">
+          <strong>AI<span>娘</span></strong>
+          <small>BREAKPOINT ARENA</small>
+        </div>
+      </div>
+      <div class="topbar-meta">
+        <span class="build-pill"><i class="live-dot"></i> LOCAL / ONLINE <b>v3.7.0</b></span>
+        <button class="icon-button sound-toggle" id="selectSoundBtn" type="button" aria-label="切换音效">
+          <svg class="sound-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>
+          <svg class="sound-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="m16 9 5 5m0-5-5 5"/></svg>
+          <span>SFX</span>
+        </button>
+        <button class="icon-button fullscreen-toggle" id="fullscreenBtn" type="button" aria-label="切换全屏">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M21 16v5h-5"/><path d="M3 8V3h5M21 8V3h-5M3 16v5h5M16 21h5v-5"/></svg>
+          <span>全屏</span>
+        </button>
+        <button class="icon-button settings-toggle" id="settingsBtn" type="button" aria-label="打开游戏设置">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.1"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.86 2.86-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4.04v-.08A1.7 1.7 0 0 0 8.9 19.36a1.7 1.7 0 0 0-1.88.34l-.06.06-2.86-2.86.06-.06A1.7 1.7 0 0 0 4.5 15a1.7 1.7 0 0 0-1.56-1.03H3v-4.04h.08A1.7 1.7 0 0 0 4.64 8.9a1.7 1.7 0 0 0-.34-1.88L4.24 6.96 7.1 4.1l.06.06A1.7 1.7 0 0 0 9.04 4.5 1.7 1.7 0 0 0 10.07 3H10v-.08h4.04V3a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.86 2.86-.06.06A1.7 1.7 0 0 0 19.4 8.9 1.7 1.7 0 0 0 21 9.93V10h.08v4.04H21A1.7 1.7 0 0 0 19.4 15Z"/></svg>
+          <span>设置</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="picker">
+      <section class="profile-panel" id="profilePanel" aria-live="polite">
+        <div class="profile-copy">
+          <div class="eyebrow">
+            <span class="eyebrow-mark"></span>
+            角色档案
+            <b id="heroNum">01</b><span>/ 05</span>
+          </div>
+
+          <div class="hero-heading">
+            <h1 id="heroName">DeepSeek</h1>
+            <span class="role-badge" id="heroRole">均衡 · 近战</span>
+          </div>
+          <div class="hero-subline">
+            <span id="heroTitle">白饭鲸娘</span>
+            <i></i>
+            <span id="heroMeme">干饭魂</span>
+          </div>
+          <p class="hero-quote" id="heroQuote">“服务器可以忙，白饭不能少。”</p>
+
+          <div class="matchup-card" id="matchupCard">
+            <span class="matchup-heart" aria-hidden="true">♡</span>
+            <div class="matchup-copy">
+              <div class="matchup-top">
+                <span class="matchup-label">微克制</span>
+                <strong id="counterName">Kimi</strong>
+                <span class="matchup-bonus">伤害 +8%</span>
+              </div>
+              <p id="counterDesc">鲸尾近身压制 Kimi 的长读条。</p>
+            </div>
+            <span class="countered-badge" id="counteredBy">被豆包微克</span>
+          </div>
+
+          <div class="stat-grid" id="statGrid">
+            <div class="stat-card">
+              <div class="stat-label"><span>生命值</span><strong id="statHp">1060</strong></div>
+              <div class="stat-bar hp"><i id="statHpBar"></i></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label"><span>TOKEN上限</span><strong id="statToken">100</strong></div>
+              <div class="stat-bar token"><i id="statTokenBar"></i></div>
+              <small class="stat-regen" id="statRegen">↻ 10.5 / 秒</small>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label"><span>普攻伤害</span><strong id="statDamage">36</strong></div>
+              <div class="stat-bar damage"><i id="statDamageBar"></i></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label"><span>暴击率</span><strong id="statCrit">18%</strong></div>
+              <div class="stat-bar crit"><i id="statCritBar"></i></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label"><span>闪避率</span><strong id="statDodge">8%</strong></div>
+              <div class="stat-bar dodge"><i id="statDodgeBar"></i></div>
+            </div>
+          </div>
+
+          <div class="desc-mode-bar">
+            <span>技能 / 被动说明</span>
+            <button class="desc-mode-btn is-active" id="descModeBtn" type="button" aria-pressed="true" title="切换完整 / 简略说明">
+              <i aria-hidden="true"></i>
+              <span>简略模式</span>
+            </button>
+          </div>
+
+          <div class="moves-block">
+            <article class="move-card normal-card">
+              <div class="move-head">
+                <span class="move-key">J</span>
+                <div class="move-title">
+                  <small>普通攻击 · 可暴击</small>
+                  <h3 id="normalName">鲸尾扫饭</h3>
+                </div>
+                <span class="move-meta" id="normalMeta">0.50s / 次</span>
+              </div>
+              <p id="normalDesc"></p>
+            </article>
+
+            <article class="move-card skill-card">
+              <div class="move-head">
+                <span class="move-key accent">K</span>
+                <div class="move-title">
+                  <small>独有技能 · 不暴击 · 低闪避</small>
+                  <h3 id="skillName">白饭管饱</h3>
+                </div>
+                <span class="move-meta" id="skillMeta">38 TOKEN</span>
+              </div>
+              <p id="skillDesc"></p>
+              <div class="move-tags">
+                <span id="skillTag">干饭人干饭魂</span>
+                <span>CD <b id="skillCd">8.0s</b></span>
+                <span>不暴击</span>
+              </div>
+            </article>
+          </div>
+
+          <article class="passive-card">
+            <span class="passive-icon" aria-hidden="true">✦</span>
+            <div class="passive-copy">
+              <div class="passive-head"><span>微被动</span><strong id="passiveName">开源省流</strong></div>
+              <p id="passiveDesc"></p>
+            </div>
+          </article>
+
+          <div class="rule-chips">
+            <span>初始 TOKEN 20</span>
+            <span>10s 后回蓝 -50%</span>
+            <span>不可二段跳</span>
+            <span>技能不可暴击</span>
+            <span>技能闪避 ×35%</span>
+            <span>Kimi 射程 +30%</span>
+          </div>
+        </div>
+
+        <div class="profile-art" aria-hidden="true">
+          <span class="art-backdrop"></span>
+          <span class="art-grid"></span>
+          <span class="art-orbit orbit-a"></span>
+          <span class="art-orbit orbit-b"></span>
+          <span class="art-index" id="artIndex">01</span>
+          <span class="art-serial" id="artSerial">DS // 001</span>
+          <img id="heroImg" src="assets/chars/deepseek.webp" alt="DeepSeek AI 娘立绘">
+          <span class="art-scan"></span>
+          <span class="art-floor"></span>
+          <span class="art-tick tick-a"></span>
+          <span class="art-tick tick-b"></span>
+          <span class="art-tick tick-c"></span>
+          <span class="art-caption">
+            <b id="artSubline">“先干三碗，再谈算力。”</b>
+            <small>本地 AI / 随时开战</small>
+          </span>
+        </div>
+      </section>
+
+      <aside class="roster-panel">
+        <div class="roster-head">
+          <div>
+            <span class="eyebrow"><span class="eyebrow-mark"></span>出战阵容</span>
+            <h2>选择出战 AI</h2>
+          </div>
+          <span class="shortcut-hint">按 <kbd>1</kbd>–<kbd>5</kbd> 切换</span>
+        </div>
+        <div class="roster-list" id="rosterList"></div>
+
+        <div class="launch-panel">
+          <div class="mode-switch" id="modeSwitch" role="tablist" aria-label="对战模式">
+            <button type="button" class="mode-button is-active" data-mode="ai" role="tab" aria-selected="true">AI 对战</button>
+            <button type="button" class="mode-button" data-mode="online" role="tab" aria-selected="false">联机对战</button>
+          </div>
+
+          <div class="launch-pane" id="aiLaunch">
+            <div class="opponent-note">
+              <span class="ai-orb" aria-hidden="true"></span>
+              <div>
+                <small>你的对手</small>
+                <strong id="aiOpponentText">随机 AI · 轻松模式</strong>
+              </div>
+              <span class="random-mark" aria-hidden="true">⟳</span>
+            </div>
+
+            <div class="difficulty-row" id="difficultyRow" role="group" aria-label="AI 强度">
+              <span>AI 强度</span>
+              <button type="button" class="difficulty-btn is-active" data-difficulty="easy">轻松</button>
+              <button type="button" class="difficulty-btn" data-difficulty="normal">标准</button>
+              <button type="button" class="difficulty-btn" data-difficulty="hard">困难</button>
+            </div>
+
+            <p class="ai-local-note"><b>LOCAL AI</b><span>本机程序决策 · 不联网 · 0 TOKEN</span></p>
+
+            <button type="button" class="start-button" id="startBtn">
+              <span class="start-button-glow"></span>
+              <span class="start-button-copy">
+                <small>准备就绪</small>
+                <b>开始对战 <i>♡</i></b>
+              </span>
+              <kbd>Enter</kbd>
+            </button>
+            <p class="launch-hint"><kbd class="key-wide">Space</kbd> 跳跃 <span>·</span> <kbd>A</kbd><kbd>D</kbd> 移动 <span>·</span> <kbd>J</kbd> 普攻 <span>·</span> <kbd>K</kbd> 技能 <span>·</span> <kbd>H</kbd> 冲刺</p>
+          </div>
+
+          <div class="launch-pane" id="onlineLaunch" hidden>
+            <div class="online-entry" id="onlineEntry">
+              <details class="online-help">
+                <summary>
+                  <span class="online-help-title">联机三步</span>
+                  <b>创建 → 选人确认 → 开战</b>
+                  <i>查看说明</i>
+                </summary>
+                <ol class="online-steps">
+                  <li><b>01</b><span>创建房间，或直接打开好友的邀请链接</span></li>
+                  <li><b>02</b><span>双方各选 AI 娘，30 秒内点击确认</span></li>
+                  <li><b>03</b><span>双方确认后立即开战，选择在开战前互相隐藏</span></li>
+                </ol>
+              </details>
+              <button type="button" class="online-create" id="createRoomBtn">
+                <span>创建房间</span>
+                <b>＋</b>
+              </button>
+              <div class="online-join-row">
+                <input id="roomCodeInput" type="text" maxlength="300" inputmode="text" autocomplete="off" spellcheck="false" placeholder="输入房间码或邀请链接" aria-label="房间码或邀请链接">
+                <button type="button" class="online-join-btn" id="joinRoomBtn">加入</button>
+              </div>
+              <p class="online-note" id="onlineNote">本机 / 局域网使用「启动游戏.bat」；跨网络使用「启动公网联机.bat」。创建房间后分享邀请链接即可。</p>
+              <p class="online-route" id="onlineRoute" hidden></p>
+            </div>
+
+            <div class="online-wait" id="onlineWait" hidden>
+              <span class="online-eyebrow">ROOM CREATED</span>
+              <strong class="online-code" id="roomCodeText">-----</strong>
+              <p id="onlineWaitText">等待另一位玩家加入房间…</p>
+              <p class="online-wait-tip">把邀请链接发给好友，对方打开后会自动加入。</p>
+              <div class="online-room-actions">
+                <button type="button" class="ghost-button small" id="copyRoomBtn">复制邀请链接</button>
+                <button type="button" class="ghost-button small" id="cancelOnlineBtn">取消</button>
+              </div>
+            </div>
+
+            <div class="online-select" id="onlineSelect" hidden>
+              <div class="online-select-head">
+                <span>选择你的 AI 娘</span>
+                <div class="online-count"><strong id="onlineTimer">30</strong><em>s</em></div>
+              </div>
+              <p class="online-my-pick">当前选择：<b id="onlineMyPick">DeepSeek</b></p>
+              <p class="online-opponent" id="onlineOpponentStatus">等待对手确认…</p>
+              <p class="online-room-mini">房间 <b id="onlineRoomMini">-----</b> · 双方选择在开战前互相隐藏</p>
+              <button type="button" class="online-confirm" id="onlineConfirmBtn">确认出战 <span>✓</span></button>
+              <button type="button" class="online-leave" id="onlineLeaveBtn">离开房间</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="select-footer">
+      <div class="basic-controls" aria-label="基础按键说明">
+        <span class="basic-controls-label">基础操作</span>
+        <span><kbd>A</kbd><kbd>D</kbd> 移动</span>
+        <span><kbd class="key-wide">Space</kbd> 跳跃</span>
+        <span><kbd>J</kbd> 普攻</span>
+        <span><kbd>K</kbd> 技能</span>
+        <span><kbd>H</kbd> 冲刺</span>
+        <span><kbd>Esc</kbd> 暂停</span>
+      </div>
+      <p class="footer-tip">先选人，再按 <kbd>Enter</kbd> 开始</p>
+      <span class="footer-author" aria-hidden="true">企鹅先生 <i>·</i> MR. PENGUIN <em>“把喜欢的事，做成能一起玩的世界。”</em></span>
+    </footer>
+  </section>
+
+  <!-- ══════════════════ 游戏须知 / 设置弹窗 ══════════════════ -->
+  <div class="dialog-layer notice-layer" id="noticeOverlay" aria-hidden="true">
+    <div class="dialog-card system-card notice-card" role="dialog" aria-modal="true" aria-labelledby="noticeTitle">
+      <button class="dialog-close" id="noticeCloseBtn" type="button" aria-label="关闭游戏须知">×</button>
+      <header class="notice-head system-rail">
+        <span class="dialog-kicker">MAID CAFE / NEON ARENA</span>
+        <h2 id="noticeTitle">游戏须知</h2>
+        <p class="system-tagline">欢迎光临破界咖啡厅</p>
+        <div class="notice-badges">
+          <span>游戏版号 <b>AIA-2026-001</b></span>
+          <span>版本 <b>v3.7.0</b></span>
+          <span>适龄提示 <b>12+</b></span>
+        </div>
+        <nav class="notice-tabs" role="tablist" aria-label="须知页面">
+          <button type="button" class="notice-tab is-active" data-notice-tab="notice" data-title="游戏须知" data-tagline="欢迎光临破界咖啡厅" data-rail="点一份菜单，选一位 AI 娘，然后在霓虹吧台开战。" role="tab" aria-selected="true">游戏须知</button>
+          <button type="button" class="notice-tab" data-notice-tab="author" data-title="作者信息" data-tagline="感谢每一位来到咖啡厅的客人" data-rail="由企鹅先生制作，也由每一次游玩继续生长。" role="tab" aria-selected="false">作者信息</button>
+        </nav>
+        <div class="rail-divider"></div>
+        <p class="notice-rail-copy">点一份菜单，选一位 AI 娘，然后在霓虹吧台开战。</p>
+        <span class="notice-rail-stamp">AI 娘 · 破界咖啡厅</span>
+      </header>
+
+      <div class="notice-body">
+        <section class="notice-page is-active" data-notice-page="notice">
+          <div class="notice-lead">
+            <span class="notice-overline">WELCOME TO THE CAFE</span>
+            <h3>欢迎光临 · 破界咖啡厅</h3>
+            <p>在霓虹闪烁的女仆咖啡厅里，五位 AI 娘各自守着一份"菜单"。<br>选一位，点单，然后开战。</p>
+          </div>
+
+          <div class="notice-grid">
+            <section class="notice-section">
+              <span class="notice-index">01</span>
+              <h3>这是什么样的游戏</h3>
+              <p>一场 1v1 的横版格斗。五位 AI 娘各有一份独门"招牌菜"：DeepSeek 靠白饭回血、GPT 甩出万字小作文、Kimi 拉满长上下文光束、Claude 落下封号法槌、豆包直接变身豆奶。<br><b>99 秒内击破对手即胜利；时间到时按剩余生命比例判定。</b></p>
+            </section>
+
+            <section class="notice-section">
+              <span class="notice-index">02</span>
+              <h3>怎么玩</h3>
+              <p>普攻可暴击，技能消耗 TOKEN 且不会暴击。中央吧台低、两侧展台高，可以跳上吧台再借力上到两侧。<br><b>冲刺可以取消普攻</b>，所以「冲刺 + 普攻」几乎能同时打出，这是贴近对手的主要手段。</p>
+              <div class="notice-keys">
+                <span><kbd>A</kbd><kbd>D</kbd><b>移动</b></span>
+                <span><kbd class="key-wide">Space</kbd><b>跳跃</b></span>
+                <span><kbd>J</kbd><b>普攻</b></span>
+                <span><kbd>K</kbd><b>技能</b></span>
+                <span><kbd>H</kbd><b>冲刺</b></span>
+                <span><kbd>Esc</kbd><b>暂停</b></span>
+              </div>
+            </section>
+
+            <section class="notice-section">
+              <span class="notice-index">03</span>
+              <h3>找一个对手</h3>
+              <p><b>AI 对战</b>：完全在本机运行，三档强度随手切，断网也能玩，不消耗任何额度。<br><b>联机对战</b>：创建房间分享邀请链接，好友打开即入。双方选人确认后开战，30 秒未确认会自动锁定当前角色。</p>
+            </section>
+          </div>
+
+          <p class="notice-health-line"><b>健康游戏忠告</b>适度游戏益脑，沉迷游戏伤身。合理安排时间，享受健康生活。</p>
+          <p class="notice-fineprint">个人非商业作品 · 游戏版号为本地构建编号，并非正式出版版号。</p>
+        </section>
+
+        <section class="notice-page notice-author-page" data-notice-page="author" hidden>
+          <div class="author-hero">
+            <span class="author-avatar" aria-hidden="true">企</span>
+            <div class="author-hero-copy">
+              <span class="author-overline">GAME CREATOR</span>
+              <h3>企鹅先生</h3>
+              <p>有点执拗，喜欢把脑洞一点点做成能玩的东西。这个小小的 AI 娘竞技场，就是其中之一。</p>
+            </div>
+          </div>
+
+          <div class="author-grid">
+            <div class="author-social">
+              <div class="author-link-row">
+                <span class="author-platform">BILIBILI</span>
+                <div class="author-link-copy">
+                  <a href="https://space.bilibili.com/1073706012" target="_blank" rel="noopener">Mr-Penguinn <i>↗</i></a>
+                  <small>B站号 1073706012</small>
+                </div>
+                <button class="copy-chip" type="button" data-copy="Mr-Penguinn · B站号 1073706012">复制</button>
+              </div>
+              <div class="author-link-row">
+                <span class="author-platform">DOUYIN</span>
+                <div class="author-link-copy">
+                  <strong>Mr-Penguin</strong>
+                  <small>抖音号 48873960247</small>
+                </div>
+                <button class="copy-chip" type="button" data-copy="Mr-Penguin · 抖音号 48873960247">复制</button>
+              </div>
+              <p class="author-support">如果喜欢这个游戏，可以在微信中扫描右侧赞赏码支持作者。每一份喜欢都会被认真收下。</p>
+            </div>
+
+            <figure class="author-qr">
+              <a href="赞赏码.jpg" target="_blank" rel="noopener" aria-label="打开微信赞赏码大图">
+                <img src="赞赏码.jpg" alt="企鹅先生的微信赞赏码">
+              </a>
+              <figcaption><b>微信赞赏码</b><span>如果喜欢游戏，可以支持作者</span></figcaption>
+            </figure>
+          </div>
+          <p class="author-signature">— 由企鹅先生用热爱制作 · 感谢你的到来 —</p>
+        </section>
+      </div>
+
+      <footer class="notice-foot">
+        <span>首次进入自动显示 · 可在「设置 → 须知」中重新查看</span>
+        <button class="primary-button" id="noticeEnterBtn" type="button">进入竞技场 <i>♡</i></button>
+      </footer>
+    </div>
+  </div>
+
+  <div class="dialog-layer settings-layer" id="settingsOverlay" aria-hidden="true">
+    <div class="dialog-card system-card settings-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <header class="settings-head system-rail">
+        <div>
+          <span class="dialog-kicker">SYSTEM / SETTINGS</span>
+          <h2 id="settingsTitle">设置</h2>
+        </div>
+        <button class="dialog-close" id="settingsCloseBtn" type="button" aria-label="关闭设置">×</button>
+      </header>
+
+      <nav class="settings-tabs" role="tablist" aria-label="设置分类">
+        <button type="button" class="settings-tab is-active" data-settings-tab="volume" role="tab" aria-selected="true">音量</button>
+        <button type="button" class="settings-tab" data-settings-tab="keys" role="tab" aria-selected="false">按键</button>
+        <button type="button" class="settings-tab" data-settings-tab="author" role="tab" aria-selected="false">作者</button>
+        <button type="button" class="settings-tab" data-settings-tab="notice" role="tab" aria-selected="false">须知</button>
+      </nav>
+      <div class="settings-rail-foot">
+        <span>AI 娘 · 破界对决</span>
+        <small>v3.7.0 / LOCAL BUILD</small>
+      </div>
+
+      <div class="settings-body">
+        <section class="settings-panel is-active" data-settings-panel="volume" role="tabpanel">
+          <div class="settings-panel-head">
+            <span>SOUND LEVEL</span>
+            <h3>音效音量</h3>
+            <p>只影响本机播放的游戏音效，不会影响联机对手。</p>
+          </div>
+          <div class="volume-box">
+            <span class="volume-symbol" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>
+            </span>
+            <div class="volume-control">
+              <input id="volumeSlider" type="range" min="0" max="100" step="1" value="100" aria-label="音效音量">
+              <div class="volume-scale"><span>静音</span><span>柔和</span><span>清晰</span></div>
+            </div>
+            <strong id="volumeValue">100%</strong>
+          </div>
+          <div class="volume-actions">
+            <button class="ghost-button small" id="settingsSoundToggle" type="button">关闭音效</button>
+            <button class="ghost-button small" id="volumeTestBtn" type="button">试听音效</button>
+            <button class="ghost-button small" id="settingsFullscreenBtn" type="button">进入全屏</button>
+          </div>
+          <p class="settings-hint" id="volumeHint">当前音效音量 100%。音量会自动保存在本机。</p>
+        </section>
+
+        <section class="settings-panel" data-settings-panel="keys" role="tabpanel" hidden>
+          <div class="settings-panel-head">
+            <span>CONTROL MAP</span>
+            <h3>按键设置</h3>
+            <p>当前为固定键位，暂不支持自定义改键。</p>
+          </div>
+          <div class="key-map">
+            <div class="key-map-row"><span class="key-map-keys"><kbd>A</kbd><kbd>D</kbd></span><div><b>左右移动</b><small>地面与空中均可调整横向位置。</small></div></div>
+            <div class="key-map-row"><span class="key-map-keys"><kbd class="key-wide">Space</kbd></span><div><b>跳跃</b><small>可以跳上中央短平台，不能二段跳。</small></div></div>
+            <div class="key-map-row"><span class="key-map-keys"><kbd>J</kbd></span><div><b>普通攻击</b><small>有独立攻击间隔，可暴击，是主要输出手段。</small></div></div>
+            <div class="key-map-row"><span class="key-map-keys"><kbd>K</kbd></span><div><b>独有技能</b><small>消耗 TOKEN，有冷却，不会暴击。</small></div></div>
+            <div class="key-map-row"><span class="key-map-keys"><kbd>H</kbd></span><div><b>冲刺</b><small>沿移动方向冲刺一小段距离，带短暂无敌帧。</small></div></div>
+            <div class="key-map-row"><span class="key-map-keys"><kbd>Esc</kbd></span><div><b>暂停 / 继续</b><small>单机对战中可用；联机对战为实时进行。</small></div></div>
+            <div class="key-map-row"><span class="key-map-keys"><kbd>1</kbd>–<kbd>5</kbd></span><div><b>快速选人</b><small>在选人界面快速切换五名角色。</small></div></div>
+          </div>
+          <div class="settings-panel-actions">
+            <button class="ghost-button small" id="openNoticeFromKeys" type="button">重新查看游戏须知</button>
+          </div>
+        </section>
+
+        <section class="settings-panel" data-settings-panel="author" role="tabpanel" hidden>
+          <div class="author-hero">
+            <span class="author-avatar" aria-hidden="true">企</span>
+            <div class="author-hero-copy">
+              <span class="author-overline">GAME CREATOR</span>
+              <h3>企鹅先生</h3>
+              <p>独立制作与运营。感谢每一位来到破界竞技场的玩家，愿你在算力对决里玩得开心。</p>
+            </div>
+          </div>
+
+          <div class="author-grid">
+            <div class="author-social">
+              <div class="author-link-row">
+                <span class="author-platform">BILIBILI</span>
+                <div class="author-link-copy">
+                  <a href="https://space.bilibili.com/1073706012" target="_blank" rel="noopener">Mr-Penguinn <i>↗</i></a>
+                  <small>B站号 1073706012</small>
+                </div>
+                <button class="copy-chip" type="button" data-copy="Mr-Penguinn · B站号 1073706012">复制</button>
+              </div>
+              <div class="author-link-row">
+                <span class="author-platform">DOUYIN</span>
+                <div class="author-link-copy">
+                  <strong>Mr-Penguin</strong>
+                  <small>抖音号 48873960247</small>
+                </div>
+                <button class="copy-chip" type="button" data-copy="Mr-Penguin · 抖音号 48873960247">复制</button>
+              </div>
+              <p class="author-support">如果喜欢这个游戏，可以在微信中扫描右侧赞赏码支持作者。每一份喜欢都会被认真收下。</p>
+            </div>
+
+            <figure class="author-qr">
+              <a href="赞赏码.jpg" target="_blank" rel="noopener" aria-label="打开微信赞赏码大图">
+                <img src="赞赏码.jpg" alt="企鹅先生的微信赞赏码">
+              </a>
+              <figcaption><b>微信赞赏码</b><span>如果喜欢游戏，可以支持作者</span></figcaption>
+            </figure>
+          </div>
+          <p class="author-signature">— 由企鹅先生用热爱制作 · 感谢你的到来 —</p>
+        </section>
+
+        <section class="settings-panel" data-settings-panel="notice" role="tabpanel" hidden>
+          <div class="settings-panel-head">
+            <span>GAME NOTICE</span>
+            <h3>游戏须知与版号</h3>
+            <p>首次进入游戏时会自动显示完整须知。你随时可以在这里重新查看。</p>
+          </div>
+          <div class="settings-notice-card">
+            <div class="settings-notice-meta">
+              <span>游戏名称 <b>AI 娘 · 破界对决</b></span>
+              <span>游戏版号 <b>AIA-2026-001</b></span>
+              <span>版本 <b>v3.7.0</b></span>
+              <span>作者 <b>企鹅先生</b></span>
+            </div>
+            <p>选择 AI 娘进行 1v1 实时对战；支持 AI 三档强度与双人联机。按键与联机步骤已收录在完整须知中。</p>
+            <div class="settings-panel-actions">
+              <button class="primary-button" id="openNoticeFromSettings" type="button">打开完整游戏须知</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ 对战界面 ══════════════════ -->
+  <section class="screen screen-battle" id="battleScreen" aria-label="AI 娘对战" aria-hidden="true">
+    <div class="battle-shell" id="battleShell">
+      <canvas id="gameCanvas" width="1280" height="720">你的浏览器需要支持 Canvas 才能游玩。</canvas>
+      <div class="battle-vignette" aria-hidden="true"></div>
+      <div class="battle-scanlines" aria-hidden="true"></div>
+
+      <div class="battle-ui">
+        <header class="hud">
+          <div class="hud-fighter hud-player">
+            <div class="hud-avatar player-avatar">
+              <img id="playerAvatar" src="assets/chars/deepseek.webp" alt="">
+              <span class="avatar-tag">YOU</span>
+            </div>
+            <div class="hud-info">
+              <div class="hud-name-row">
+                <strong id="playerHudName">DeepSeek</strong>
+                <span id="playerHudTag">白饭鲸娘</span>
+              </div>
+              <div class="hud-bar hp-bar">
+                <i class="hud-bar-fill" id="playerHpFill"></i>
+                <span id="playerHpText">1060 / 1060</span>
+              </div>
+              <div class="hud-bar token-bar">
+                <i class="hud-bar-fill" id="playerTokenFill"></i>
+                <span class="token-label">TOKEN</span>
+                <b id="playerTokenText">100</b>
+              </div>
+            </div>
+          </div>
+
+          <div class="match-clock">
+            <span class="round-label">ROUND 01</span>
+            <strong id="timerText">99</strong>
+            <span class="clock-caption">TIME</span>
+          </div>
+
+          <div class="latency-badge" id="latencyBadge" hidden>
+            <span class="latency-dot" aria-hidden="true"></span>
+            <strong id="latencyText">检测中</strong>
+          </div>
+
+          <div class="hud-fighter hud-enemy">
+            <div class="hud-avatar enemy-avatar">
+              <img id="enemyAvatar" src="assets/chars/gpt.webp" alt="">
+              <span class="avatar-tag">AI</span>
+            </div>
+            <div class="hud-info">
+              <div class="hud-name-row">
+                <span id="enemyHudTag">纯白龙娘</span>
+                <strong id="enemyHudName">GPT</strong>
+              </div>
+              <div class="hud-bar hp-bar">
+                <i class="hud-bar-fill" id="enemyHpFill"></i>
+                <span id="enemyHpText">940 / 940</span>
+              </div>
+              <div class="hud-bar token-bar">
+                <i class="hud-bar-fill" id="enemyTokenFill"></i>
+                <span class="token-label">TOKEN</span>
+                <b id="enemyTokenText">100</b>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div class="battle-top-actions">
+          <span class="net-badge" id="netBadge" hidden>服务器中继</span>
+          <button class="icon-button sound-toggle" id="battleSoundBtn" type="button" aria-label="切换音效">
+            <svg class="sound-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>
+            <svg class="sound-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="m16 9 5 5m0-5-5 5"/></svg>
+            <span>SFX</span>
+          </button>
+          <button class="icon-button pause-button" id="pauseBtn" type="button" aria-label="暂停">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+            <span>ESC</span>
+          </button>
+        </div>
+
+        <aside class="control-guide" aria-label="对战键位说明">
+          <div class="guide-title"><span>按键指南</span><i>♡</i></div>
+          <div class="guide-grid">
+            <div><span class="guide-keys"><kbd>A</kbd><kbd>D</kbd></span><em>移动</em></div>
+            <div><kbd class="key-wide">Space</kbd><em>跳跃</em></div>
+            <div><kbd>J</kbd><em>普攻</em></div>
+            <div><kbd>K</kbd><em>技能</em></div>
+            <div><kbd>H</kbd><em>冲刺</em></div>
+            <div><kbd>Esc</kbd><em>暂停</em></div>
+          </div>
+        </aside>
+
+        <div class="battle-cd-monitor" aria-label="技能冷却实时状态">
+          <div class="cd-monitor-title"><span>冷却监视</span><i>实时</i></div>
+          <div class="guide-skill" id="guideSkill">
+            <div class="skill-cd-orb" id="skillCdOrb" style="--cd-progress: 100">
+              <span class="skill-cd-inner">
+                <kbd>K</kbd>
+                <strong id="guideSkillState">READY</strong>
+              </span>
+            </div>
+            <div class="guide-skill-info">
+              <span>技能冷却</span>
+              <b id="guideSkillName">白饭管饱</b>
+              <div class="guide-skill-track"><i id="guideSkillFill"></i></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="passive-banner" id="passiveBanner" aria-live="polite"></div>
+
+        <div class="announce" id="announce" aria-live="assertive"></div>
+        <div class="hud-toast" id="hudToast" aria-live="polite"></div>
+
+        <div class="ability-dock">
+          <div class="ability-card" id="normalAbility">
+            <span class="ability-key">J</span>
+            <div class="ability-copy">
+              <small>普通攻击</small>
+              <strong id="abilityNormalName">鲸尾扫饭</strong>
+            </div>
+            <span class="ability-state" id="normalState">READY</span>
+            <span class="ability-progress"><i id="normalProgress"></i></span>
+          </div>
+          <div class="ability-card skill-ability" id="skillAbility">
+            <span class="ability-key accent">K</span>
+            <div class="ability-copy">
+              <small>独有技能 · <b id="abilitySkillCost">38 TOKEN</b></small>
+              <strong id="abilitySkillName">白饭管饱</strong>
+            </div>
+            <span class="ability-state" id="skillState">READY</span>
+            <span class="ability-progress"><i id="skillProgress"></i></span>
+          </div>
+        </div>
+
+        <div class="controls-strip">
+          <span><kbd>A</kbd><kbd>D</kbd> 移动</span>
+          <span><kbd class="key-wide">Space</kbd> 跳跃</span>
+          <span><kbd>J</kbd> 普攻</span>
+          <span><kbd>K</kbd> 技能</span>
+          <span><kbd>H</kbd> 冲刺</span>
+          <span class="controls-note">无向下键 · 无二段跳</span>
+        </div>
+      </div>
+
+      <!-- 移动端触屏按键：仅在触屏设备显示，走与键盘相同的输入通道 -->
+      <div class="touch-pad" id="touchPad" aria-hidden="true">
+        <div class="touch-move">
+          <button type="button" class="touch-btn touch-move-btn" data-touch="KeyA" aria-label="向左移动">‹</button>
+          <button type="button" class="touch-btn touch-move-btn" data-touch="KeyD" aria-label="向右移动">›</button>
+        </div>
+        <div class="touch-actions">
+          <button type="button" class="touch-btn touch-act touch-act-jump" data-touch="Space" aria-label="跳跃">
+            <span>跳</span>
+          </button>
+          <button type="button" class="touch-btn touch-act touch-act-dash" data-touch="KeyH" aria-label="冲刺">
+            <span>冲刺</span>
+          </button>
+          <button type="button" class="touch-btn touch-act touch-act-skill" data-touch="KeyK" aria-label="技能">
+            <span>技能</span>
+          </button>
+          <button type="button" class="touch-btn touch-act touch-act-normal" data-touch="KeyJ" aria-label="普通攻击">
+            <span>普攻</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="overlay pause-overlay" id="pauseOverlay" aria-hidden="true">
+        <div class="overlay-card pause-card">
+          <span class="overlay-eyebrow">SYSTEM PAUSED</span>
+          <h2>战斗暂停</h2>
+          <p class="overlay-sub">喘口气，白饭还热着。</p>
+          <div class="pause-rules">
+            <div><kbd>A</kbd><kbd>D</kbd><span>左右移动</span></div>
+            <div><kbd class="key-wide">Space</kbd><span>跳跃 / 上短平台</span></div>
+            <div><kbd>J</kbd><span>普通攻击（可暴击）</span></div>
+            <div><kbd>K</kbd><span>消耗 TOKEN 施放技能</span></div>
+            <div><kbd>H</kbd><span>沿移动方向冲刺</span></div>
+            <div><kbd>ESC</kbd><span>继续 / 暂停</span></div>
+          </div>
+          <p class="pause-note">远程攻击限半场 · 开局 20 TOKEN，10 秒后回复 -50% · 技能不暴击 / 低闪避</p>
+          <div class="overlay-actions">
+            <button type="button" class="primary-button" id="resumeBtn">继续战斗</button>
+            <button type="button" class="ghost-button" id="quitBtn">返回选人</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="overlay result-overlay" id="resultOverlay" aria-hidden="true">
+        <div class="overlay-card result-card" id="resultCard">
+          <span class="result-scan" aria-hidden="true"></span>
+          <span class="overlay-eyebrow" id="resultKicker">MATCH COMPLETE</span>
+          <h2 id="resultTitle">VICTORY</h2>
+          <p class="overlay-sub" id="resultSub">对手已被击破。</p>
+          <div class="result-body">
+            <div class="result-portrait">
+              <img id="resultImg" src="assets/chars/deepseek.webp" alt="">
+              <span class="result-badge" id="resultBadge">YOU</span>
+            </div>
+            <div class="result-stats" id="resultStats"></div>
+          </div>
+          <div class="overlay-actions">
+            <button type="button" class="primary-button" id="rematchBtn">再战一局</button>
+            <button type="button" class="ghost-button" id="changeBtn">结束</button>
+          </div>
+          <p class="rematch-countdown" id="rematchTimer">15 秒内可选择再战或结束</p>
+          <p class="result-footnote" id="resultFootnote">下一场将随机匹配新的对手</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="game.js"></script>
+</body>
+</html>
