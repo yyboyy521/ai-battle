@@ -9511,3 +9511,592 @@ body.is-touch .touch-pad .touch-act-skill .touch-skill-name {
     max-width: 96px !important;
   }
 }
+/* ═══════════════════════════════════════════════════════════
+   v3.9.0 · 手机端细节调整
+   ═══════════════════════════════════════════════════════════ */
+
+/* ① 选人页：隐藏底部键位提示条 */
+body.is-touch .controls-strip,
+body.is-touch .launch-hint,
+body.is-touch .select-footer,
+body.is-touch .shortcut-hint {
+  display: none !important;
+}
+
+/* ② 对战页：隐藏顶部技能按键提示（左侧 guide 与右侧 CD 面板） */
+body.is-touch .control-guide,
+body.is-touch .battle-cd-monitor,
+body.is-touch .ability-dock {
+  display: none !important;
+}
+
+/* ③ 左右移动键加大 */
+body.is-touch .touch-pad .touch-move-btn {
+  width: 96px !important;
+  height: 96px !important;
+  font-size: 40px !important;
+}
+
+body.is-touch .touch-pad .touch-move {
+  gap: 14px !important;
+}
+
+/* ④ 跳跃键与冲刺键同一水平线，整体右移 */
+body.is-touch .touch-pad .touch-act-jump {
+  right: var(--tm-pos, 0) !important;
+  bottom: calc(var(--tb) + var(--gap)) !important;
+}
+
+/* ⑤ 技能键：CD 精确到 0.1s，蓝不够时变灰 */
+body.is-touch .touch-act-skill.is-no-token:not(.is-cooling) {
+  border-color: rgba(120, 120, 140, .55) !important;
+  background: radial-gradient(circle at 34% 28%, rgba(90, 90, 110, .30), rgba(30, 26, 38, .88)) !important;
+  filter: saturate(.35) brightness(.78);
+}
+
+body.is-touch .touch-act-skill.is-no-token:not(.is-cooling) .touch-skill-name {
+  color: #9d95a8 !important;
+  opacity: .85;
+}
+
+body.is-touch .touch-act-skill.is-no-token:not(.is-cooling) .touch-skill-key {
+  color: #7d7588 !important;
+  opacity: .7;
+}
+
+/* 冷却中优先显示 CD（压过"蓝不够"的灰度） */
+body.is-touch .touch-act-skill.is-cooling {
+  filter: none !important;
+}
+
+/* ⑥ 冲刺 / 普攻：删除读秒显示，只保留轻微压暗 */
+body.is-touch .touch-pad [data-touch="KeyH"] .touch-cd-num,
+body.is-touch .touch-pad [data-touch="KeyJ"] .touch-cd-num {
+  display: none !important;
+}
+
+body.is-touch .touch-pad [data-touch="KeyH"] .touch-cd-mask,
+body.is-touch .touch-pad [data-touch="KeyJ"] .touch-cd-mask {
+  background: rgba(14, 6, 22, .42) !important;
+}
+/* ═══════════════════════════════════════════════════════════
+   v3.9.1 · 顶部两键同高 + 跳跃右移（最终位置）
+   底部：普攻(右) 技能(左)
+   顶部：跳跃(左) 冲刺(右) —— 两者 bottom 相同 = 同一水平线
+   ═══════════════════════════════════════════════════════════ */
+body.is-touch .touch-pad .touch-actions {
+  --top-row-bottom: calc(var(--tb) + var(--gap)) !important;
+}
+
+body.is-touch .touch-pad .touch-act-jump {
+  width: var(--ts) !important;
+  height: var(--ts) !important;
+  right: calc(var(--tm) + var(--gap)) !important;
+  bottom: var(--top-row-bottom) !important;
+}
+
+body.is-touch .touch-pad .touch-act-dash {
+  width: var(--ts) !important;
+  height: var(--ts) !important;
+  right: 0 !important;
+  bottom: var(--top-row-bottom) !important;
+}
+
+body.is-touch .touch-pad .touch-act-skill {
+  right: calc(var(--tb) + var(--gap)) !important;
+  bottom: 0 !important;
+}
+
+body.is-touch .touch-pad .touch-act-normal {
+  right: 0 !important;
+  bottom: 0 !important;
+}
+/* ═══════════════════════════════════════════════════════════
+   v3.9.2 · 手机端须知 / 设置：缩小字号，每栏一页容纳
+   ═══════════════════════════════════════════════════════════ */
+@media (max-height: 481px) {
+  body.is-touch .overlay-card {
+    max-height: calc(100dvh - 24px) !important;
+    overflow-y: auto !important;
+    padding: 12px 14px !important;
+    border-radius: 14px !important;
+    scrollbar-width: thin;
+  }
+
+  body.is-touch .overlay-card h2 {
+    font-size: 16px !important;
+    margin-bottom: 4px !important;
+  }
+
+  body.is-touch .overlay-eyebrow {
+    font-size: 8px !important;
+    letter-spacing: .18em !important;
+  }
+
+  body.is-touch .overlay-sub,
+  body.is-touch .overlay-card p {
+    font-size: 10px !important;
+    line-height: 1.45 !important;
+    margin: 3px 0 !important;
+  }
+
+  body.is-touch .overlay-card h3,
+  body.is-touch .overlay-card h4,
+  body.is-touch .overlay-card strong {
+    font-size: 11px !important;
+    line-height: 1.3 !important;
+  }
+
+  body.is-touch .overlay-card li,
+  body.is-touch .overlay-card small,
+  body.is-touch .overlay-card span,
+  body.is-touch .overlay-card label,
+  body.is-touch .overlay-card em {
+    font-size: 9.5px !important;
+    line-height: 1.45 !important;
+  }
+
+  body.is-touch .overlay-card kbd {
+    font-size: 8px !important;
+    padding: 0 4px !important;
+    min-width: 14px !important;
+    height: 16px !important;
+    line-height: 16px !important;
+  }
+
+  body.is-touch .notice-rules,
+  body.is-touch .notice-list,
+  body.is-touch .settings-section,
+  body.is-touch .pause-rules {
+    gap: 4px !important;
+    margin: 4px 0 !important;
+  }
+
+  body.is-touch .notice-rules > *,
+  body.is-touch .settings-row,
+  body.is-touch .pause-rules > div {
+    padding: 3px 6px !important;
+    min-height: 0 !important;
+  }
+
+  body.is-touch .overlay-actions {
+    margin-top: 6px !important;
+    gap: 6px !important;
+  }
+
+  body.is-touch .primary-button,
+  body.is-touch .ghost-button {
+    min-height: 34px !important;
+    font-size: 11px !important;
+    padding: 0 14px !important;
+  }
+
+  /* 设置项：标签与控件同排，压缩高度 */
+  body.is-touch .settings-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+  }
+
+  body.is-touch .toggle-switch,
+  body.is-touch .settings-toggle {
+    width: 38px !important;
+    height: 20px !important;
+    flex: 0 0 auto;
+  }
+
+  body.is-touch .settings-slider,
+  body.is-touch input[type="range"] {
+    height: 16px !important;
+    max-width: 120px !important;
+  }
+}
+
+/* 竖屏（虽然会提示横屏，但保证不溢出） */
+@media (max-height: 700px) and (orientation: portrait) {
+  body.is-touch .overlay-card {
+    max-height: 88dvh !important;
+    overflow-y: auto !important;
+  }
+}
+/* ═══════════════════════════════════════════════════════════
+   v3.9.3 · 手机端须知 / 设置（匹配真实类名 .dialog-card）
+   ═══════════════════════════════════════════════════════════ */
+@media (max-height: 481px) {
+  body.is-touch .dialog-layer {
+    padding: 6px !important;
+    align-items: stretch !important;
+  }
+
+  body.is-touch .dialog-card {
+    max-height: calc(100dvh - 12px) !important;
+    width: 100% !important;
+    max-width: 860px !important;
+    overflow-y: auto !important;
+    padding: 10px 12px 12px !important;
+    border-radius: 14px !important;
+    scrollbar-width: thin;
+  }
+
+  body.is-touch .dialog-card::-webkit-scrollbar { width: 5px; }
+  body.is-touch .dialog-card::-webkit-scrollbar-thumb {
+    background: rgba(255, 158, 203, .45);
+    border-radius: 3px;
+  }
+
+  body.is-touch .dialog-close {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 15px !important;
+    top: 6px !important;
+    right: 6px !important;
+  }
+
+  body.is-touch .dialog-card h2 {
+    font-size: 15px !important;
+    line-height: 1.25 !important;
+    margin: 2px 0 3px !important;
+  }
+
+  body.is-touch .dialog-kicker {
+    font-size: 7.5px !important;
+    letter-spacing: .16em !important;
+  }
+
+  body.is-touch .system-tagline {
+    font-size: 9.5px !important;
+    margin: 2px 0 4px !important;
+  }
+
+  body.is-touch .notice-badges {
+    margin: 4px 0 6px !important;
+    gap: 4px !important;
+  }
+
+  body.is-touch .notice-badges span {
+    font-size: 8px !important;
+    padding: 1px 5px !important;
+  }
+
+  body.is-touch .notice-tabs {
+    gap: 4px !important;
+    margin-bottom: 6px !important;
+  }
+
+  body.is-touch .notice-tab {
+    min-height: 24px !important;
+    font-size: 10px !important;
+    padding: 3px 9px !important;
+    border-radius: 8px !important;
+  }
+
+  body.is-touch .dialog-card p,
+  body.is-touch .dialog-card li,
+  body.is-touch .dialog-card span,
+  body.is-touch .dialog-card label,
+  body.is-touch .dialog-card small,
+  body.is-touch .dialog-card em,
+  body.is-touch .dialog-card td,
+  body.is-touch .dialog-card th {
+    font-size: 9.5px !important;
+    line-height: 1.42 !important;
+  }
+
+  body.is-touch .dialog-card h3,
+  body.is-touch .dialog-card h4,
+  body.is-touch .dialog-card strong,
+  body.is-touch .dialog-card b {
+    font-size: 10.5px !important;
+    line-height: 1.3 !important;
+  }
+
+  body.is-touch .dialog-card kbd {
+    font-size: 8px !important;
+    min-width: 13px !important;
+    height: 15px !important;
+    line-height: 15px !important;
+    padding: 0 3px !important;
+  }
+
+  body.is-touch .notice-panel,
+  body.is-touch .settings-panel,
+  body.is-touch .notice-rules,
+  body.is-touch .notice-list {
+    gap: 4px !important;
+    margin: 4px 0 0 !important;
+  }
+
+  body.is-touch .notice-panel > *,
+  body.is-touch .settings-row,
+  body.is-touch .notice-rules > *,
+  body.is-touch .pause-rules > div {
+    padding: 3px 6px !important;
+    margin: 0 !important;
+    min-height: 0 !important;
+  }
+
+  body.is-touch .dialog-actions,
+  body.is-touch .overlay-actions {
+    margin-top: 6px !important;
+    gap: 6px !important;
+  }
+
+  body.is-touch .dialog-card button {
+    min-height: 30px !important;
+    font-size: 10.5px !important;
+    padding: 0 12px !important;
+  }
+
+  /* 设置项压缩 */
+  body.is-touch .settings-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    border-radius: 8px !important;
+  }
+
+  body.is-touch .toggle-switch,
+  body.is-touch .settings-toggle,
+  body.is-touch [role="switch"] {
+    width: 36px !important;
+    height: 19px !important;
+    min-height: 19px !important;
+    flex: 0 0 auto;
+  }
+
+  body.is-touch input[type="range"] {
+    height: 14px !important;
+    max-width: 110px !important;
+  }
+
+  body.is-touch .pause-rules {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 3px 10px !important;
+  }
+}
+
+/* ================================================================
+   v3.9.4 · 立绘放大但不出框（保持等比 contain）
+   ================================================================ */
+@media (max-height: 481px) {
+  body.is-touch .profile-art {
+    overflow: hidden !important;
+    flex: 0 0 auto !important;
+    width: 128px !important;
+    min-width: 128px !important;
+    max-width: 128px !important;
+  }
+
+  body.is-touch .profile-art #heroImg {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    transform: none !important;
+    object-fit: contain !important;
+    object-position: center bottom !important;
+    margin: 0 !important;
+  }
+
+  body.is-touch .profile-copy {
+    padding: 6px 8px !important;
+  }
+
+  body.is-touch .hero-heading h1 {
+    font-size: 16px !important;
+  }
+}
+
+/* ================================================================
+   v3.9.6 · 须知面板：隐藏会重叠的斜排装饰文字
+   ================================================================ */
+@media (max-height: 481px) {
+  body.is-touch .notice-head {
+    padding: 4px 6px !important;
+  }
+
+  body.is-touch .system-rail::before,
+  body.is-touch .system-rail::after,
+  body.is-touch .notice-card .system-rail > em,
+  body.is-touch .system-rail .rail-text,
+  body.is-touch .notice-rail,
+  body.is-touch .rail-tag,
+  body.is-touch .notice-rail-copy,
+  body.is-touch .notice-rail-label {
+    display: none !important;
+  }
+}
+
+/* ================================================================
+   v3.9.7 · 设置面板：压缩到一屏（每个标签页都不滚动）
+   ================================================================ */
+@media (max-height: 481px) {
+  body.is-touch .settings-card {
+    padding: 8px 10px !important;
+  }
+
+  body.is-touch .settings-card h2 {
+    font-size: 14px !important;
+    margin: 1px 0 2px !important;
+  }
+
+  body.is-touch .settings-card .dialog-kicker {
+    font-size: 7px !important;
+  }
+
+  /* 标签页横排，更紧凑 */
+  body.is-touch .settings-tabs {
+    gap: 3px !important;
+    margin: 4px 0 6px !important;
+  }
+
+  body.is-touch .settings-tab {
+    min-height: 22px !important;
+    font-size: 9.5px !important;
+    padding: 2px 9px !important;
+    border-radius: 7px !important;
+  }
+
+  /* 正文区压缩 */
+  body.is-touch .settings-body {
+    gap: 5px !important;
+    margin-top: 2px !important;
+  }
+
+  body.is-touch .settings-panel-head {
+    margin-bottom: 3px !important;
+  }
+
+  body.is-touch .settings-panel-head > span {
+    font-size: 6.5px !important;
+    letter-spacing: .16em !important;
+  }
+
+  body.is-touch .settings-panel-head h3 {
+    font-size: 11px !important;
+    margin: 0 0 1px !important;
+  }
+
+  body.is-touch .settings-panel-head p {
+    font-size: 9px !important;
+    margin: 0 !important;
+    line-height: 1.35 !important;
+  }
+
+  /* 音量框压扁 */
+  body.is-touch .volume-box {
+    padding: 4px 8px !important;
+    gap: 8px !important;
+    border-radius: 9px !important;
+    margin-bottom: 4px !important;
+  }
+
+  body.is-touch .volume-symbol {
+    width: 22px !important;
+    height: 22px !important;
+    flex: 0 0 22px;
+  }
+
+  body.is-touch .volume-symbol svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  body.is-touch .volume-scale {
+    font-size: 7.5px !important;
+    margin-top: 1px !important;
+  }
+
+  body.is-touch .volume-box strong {
+    font-size: 11px !important;
+    min-width: 38px;
+  }
+
+  body.is-touch .volume-actions {
+    gap: 5px !important;
+    margin-top: 4px !important;
+    flex-wrap: wrap;
+  }
+
+  body.is-touch .volume-actions button {
+    min-height: 26px !important;
+    font-size: 9.5px !important;
+    padding: 0 10px !important;
+  }
+
+  /* 按键表：紧凑三列 */
+  body.is-touch .keys-grid,
+  body.is-touch .key-list {
+    gap: 3px !important;
+    font-size: 9px !important;
+  }
+
+  body.is-touch .keys-grid > *,
+  body.is-touch .key-row {
+    padding: 2px 6px !important;
+    min-height: 0 !important;
+    font-size: 9px !important;
+  }
+
+  /* 页脚淡出 */
+  body.is-touch .settings-rail-foot {
+    display: none !important;
+  }
+
+  /* 作者 / 须知页内的段落行距收紧 */
+  body.is-touch .settings-panel p,
+  body.is-touch .settings-panel li {
+    font-size: 9px !important;
+    line-height: 1.35 !important;
+    margin: 2px 0 !important;
+  }
+}
+/* ================================================================
+   v3.9.8 · 手机端渲染流畅度
+   - 降低装饰层开销（模糊/阴影最吃 GPU）
+   - 保留游戏画布清晰度
+   ================================================================ */
+body.is-touch .page-atmosphere .atmo-noise,
+body.is-touch .page-atmosphere .atmo-grid {
+  display: none !important;
+}
+
+body.is-touch .page-atmosphere .atmo-orb {
+  filter: none !important;
+  opacity: .55 !important;
+}
+
+/* 对战界面的浮层装饰减负 */
+body.is-touch .battle-shell::after,
+body.is-touch .battle-shell::before {
+  display: none !important;
+}
+
+/* HUD 减少模糊成本 */
+body.is-touch .hud,
+body.is-touch .match-clock {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 触屏键用合成层加速，按下不触发重绘 */
+body.is-touch .touch-btn {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* 禁止整页滚动回弹，避免边缘手势打断操作 */
+body.is-touch.is-battling {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}

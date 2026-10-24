@@ -94,18 +94,18 @@
     },
     normal: {
       label: "标准",
-      decisionMin: 0.2,
-      decisionMax: 0.4,
-      attackRanged: 0.7,
-      attackMelee: 0.88,
-      skillChance: 0.46,
-      dodgeChance: 0.3,
-      jumpAbove: 0.44,
-      aimX: 16,
-      aimY: 28,
-      initialLockout: 2.2,
-      skillLockoutMin: 3.2,
-      skillLockoutMax: 5.4
+      decisionMin: 0.26,
+      decisionMax: 0.48,
+      attackRanged: 0.66,
+      attackMelee: 0.84,
+      skillChance: 0.42,
+      dodgeChance: 0.26,
+      jumpAbove: 0.4,
+      aimX: 20,
+      aimY: 34,
+      initialLockout: 2.5,
+      skillLockoutMin: 3.6,
+      skillLockoutMax: 6.0
     },
     hard: {
       label: "困难",
@@ -3252,19 +3252,25 @@
     };
 
     for (const btn of buttons) {
+      /* 流畅度优化：
+         - 用 pointerdown 而非 click/touchstart，响应最快；
+         - 只在需要时 preventDefault（阻止长按菜单与选中），不调用 stopPropagation，
+           避免事件在冒泡阶段被反复处理；
+         - touch-action:none 已由 CSS 设定，无需 JS 干预滚动；
+         - passive:false 仅在真正需要 preventDefault 的两个事件上使用。 */
       btn.addEventListener("pointerdown", (event) => {
         event.preventDefault();
-        event.stopPropagation();
+        // 直接捕获，保证手指滑出按钮也能正确收到 pointerup
         try { btn.setPointerCapture(event.pointerId); } catch (e) { /* 忽略 */ }
         press(btn, event.pointerId);
       }, { passive: false });
       btn.addEventListener("pointerup", (event) => {
-        event.preventDefault();
         release(event.pointerId);
-      }, { passive: false });
-      btn.addEventListener("pointercancel", (event) => release(event.pointerId));
-      btn.addEventListener("lostpointercapture", (event) => release(event.pointerId));
-      btn.addEventListener("contextmenu", (event) => event.preventDefault());
+      }, { passive: true });
+      btn.addEventListener("pointercancel", (event) => release(event.pointerId), { passive: true });
+      btn.addEventListener("lostpointercapture", (event) => release(event.pointerId), { passive: true });
+      // 阻止 iOS/Android 长按弹出菜单（仅在触发的元素上，不冒泡）
+      btn.addEventListener("contextmenu", (event) => event.preventDefault(), { passive: false });
     }
 
     // 切到后台 / 弹窗打开时松开所有键，避免"粘键"
@@ -4600,7 +4606,8 @@
       } else if (!isMeleeD && distD < prefD - 80) {
         dashDirD = -towardD;
       }
-      if (dashDirD !== 0 && Math.random() < 0.9) {
+      // 冲刺触发率：0.9 → 0.45（降低 50%），让 AI 不再靠冲刺压制玩家
+      if (dashDirD !== 0 && Math.random() < 0.45) {
         me.facing = dashDirD;
         tryDash(me, b);
       }
@@ -6304,18 +6311,28 @@
       ["[data-touch=\"KeyH\"]", local.dashCd, DASH_COOLDOWN],
       ["[data-touch=\"KeyK\"]", local.skillCd, local.char.skill.cooldown]
     ];
+    const skillBtn = pad.querySelector("[data-touch=\"KeyK\"]");
+    const noToken = local.token < local.char.skill.cost;
 
     for (const [sel, cd, total] of rows) {
       const btn = pad.querySelector(sel);
       if (!btn) continue;
       const mask = btn.querySelector(".touch-cd-mask");
       const num = btn.querySelector(".touch-cd-num");
-      const cooling = cd > 0.02 && total > 0;
+      const isSkill = sel.includes("KeyK");
+      // 技能冷却精确到 0.1 秒，其余只做遮罩不读秒
+      const cooling = isSkill ? cd > 0.05 && total > 0 : cd > 0.02 && total > 0;
       const pct = cooling ? clamp((cd / total) * 100, 0, 100) : 0;
 
       if (mask) mask.style.setProperty("--cd-pct", `${pct.toFixed(1)}%`);
-      if (num) num.textContent = cooling && cd >= 0.35 ? (cd >= 1 ? Math.ceil(cd) : cd.toFixed(1)) : "";
+      if (num) {
+        num.textContent = isSkill && cooling ? cd.toFixed(1) : "";
+      }
       btn.classList.toggle("is-cooling", cooling);
+      if (isSkill) {
+        // 蓝量不足时才变灰；冷却中的优先级更高（JS 里两者互斥，冷却结束后才可能变灰）
+        btn.classList.toggle("is-no-token", noToken && !cooling);
+      }
 
       // 从"冷却中"回到"就绪"时闪一下
       const prev = touchCdState.get(btn) || false;
