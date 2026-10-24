@@ -550,6 +550,10 @@
 
   const ui = {
     profilePanel: $("#profilePanel"),
+    touchSkillName: $("#touchSkillName"),
+    normalShort: $("#normalShort"),
+    skillShort: $("#skillShort"),
+    passiveShort: $("#passiveShort"),
     heroNum: $("#heroNum"),
     heroName: $("#heroName"),
     heroRole: $("#heroRole"),
@@ -2299,6 +2303,10 @@
     ui.normalDesc.textContent = compactDescriptions ? (c.normal.shortDesc || c.normal.desc) : c.normal.desc;
     ui.skillDesc.textContent = compactDescriptions ? (c.skill.shortDesc || c.skill.desc) : c.skill.desc;
     ui.passiveDesc.textContent = compactDescriptions ? (c.passive.shortDesc || c.passive.desc) : c.passive.desc;
+    // 手机端专用：只显示简略版（一行）
+    if (ui.normalShort) ui.normalShort.textContent = c.normal.shortDesc || "";
+    if (ui.skillShort) ui.skillShort.textContent = c.skill.shortDesc || "";
+    if (ui.passiveShort) ui.passiveShort.textContent = c.passive.shortDesc || "";
     updateDescriptionModeButton();
   }
 
@@ -2984,6 +2992,8 @@
     ui.abilitySkillName.textContent = p.skill.name;
     ui.abilitySkillCost.textContent = `${p.skill.cost} TOKEN`;
     ui.guideSkillName.textContent = p.skill.name;
+    // 触屏技能键上显示当前角色的技能名
+    if (ui.touchSkillName) ui.touchSkillName.textContent = p.skill.name;
 
     ui.playerHpText.textContent = `${Math.ceil(b.player.hp)} / ${p.hpMax}`;
     ui.enemyHpText.textContent = `${Math.ceil(b.enemy.hp)} / ${e.hpMax}`;
@@ -3177,16 +3187,22 @@
     if (!pad) return;
     const buttons = [...pad.querySelectorAll("[data-touch]")];
 
-    /* 触屏判定：只用"媒体查询说的粗指针"这一个可靠信号。
-       注意：不要用 navigator.maxTouchPoints 或 screen 尺寸做判断——
-       无头浏览器 / 部分桌面浏览器会上报 maxTouchPoints=10、screen=800×600，
-       把电脑端误判成手机（已经踩过两次）。 */
+    /* 触屏判定（第 5 版 · 最终）
+       组合判定，任一成立即视为触屏：
+         A) pointer: coarse 且 hover: none —— 真手机的标准特征；
+         B) 移动设备 UA —— 真手机浏览器一定会带 Mobile/Android/iPhone 标记；
+         C) 首次真实 touchstart —— 鼠标设备永不触发，终极兜底。
+
+       明确排除：只有 navigator.maxTouchPoints 或 screen 尺寸这两个信号
+       不算（无头/桌面浏览器会报 10 和 800×600，反复误伤电脑端）。 */
     const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
-    const isTouchDevice = coarsePointer;
+    const noHover = window.matchMedia("(hover: none)").matches;
+    const mobileUA = /Android|iPhone|iPad|iPod|Mobile|HarmonyOS|MiuiBrowser|MicroMessenger/i
+      .test(navigator.userAgent || "");
+    const isTouchDevice = (coarsePointer && noHover) || mobileUA;
     document.body.classList.toggle("is-touch", isTouchDevice);
 
-    /* 兜底：如果媒体查询不准，等真实触摸事件发生时再补上。
-       鼠标设备永远不会触发 touchstart，所以不会误伤电脑端。 */
+    /* 兜底：真实触摸发生时补上（鼠标设备不会触发） */
     if (!isTouchDevice) {
       const enableOnFirstTouch = () => {
         document.body.classList.add("is-touch");
@@ -6271,6 +6287,46 @@
     ui.guideSkill.classList.toggle("is-no-token", skillCd <= 0.02 && skillNoToken);
     setWidth(ui.guideSkillFill, skillPct);
     ui.skillCdOrb.style.setProperty("--cd-progress", clamp(skillPct, 0, 100).toFixed(2));
+
+    updateTouchCooldowns(local);
+  }
+
+  /* 触屏按键上的实时冷却：遮罩高度 + 剩余秒数 + CD 归零时闪光。
+     只在触屏设备上执行，电脑端不受影响。 */
+  const touchCdState = new WeakMap();
+  function updateTouchCooldowns(local) {
+    if (!document.body.classList.contains("is-touch")) return;
+    const pad = document.getElementById("touchPad");
+    if (!pad) return;
+
+    const rows = [
+      ["[data-touch=\"KeyJ\"]", local.normalCd, local.char.normal.cooldown],
+      ["[data-touch=\"KeyH\"]", local.dashCd, DASH_COOLDOWN],
+      ["[data-touch=\"KeyK\"]", local.skillCd, local.char.skill.cooldown]
+    ];
+
+    for (const [sel, cd, total] of rows) {
+      const btn = pad.querySelector(sel);
+      if (!btn) continue;
+      const mask = btn.querySelector(".touch-cd-mask");
+      const num = btn.querySelector(".touch-cd-num");
+      const cooling = cd > 0.02 && total > 0;
+      const pct = cooling ? clamp((cd / total) * 100, 0, 100) : 0;
+
+      if (mask) mask.style.setProperty("--cd-pct", `${pct.toFixed(1)}%`);
+      if (num) num.textContent = cooling && cd >= 0.35 ? (cd >= 1 ? Math.ceil(cd) : cd.toFixed(1)) : "";
+      btn.classList.toggle("is-cooling", cooling);
+
+      // 从"冷却中"回到"就绪"时闪一下
+      const prev = touchCdState.get(btn) || false;
+      if (prev && !cooling) {
+        btn.classList.remove("is-ready-flash");
+        void btn.offsetWidth;   // 强制重排，让动画能重放
+        btn.classList.add("is-ready-flash");
+        window.setTimeout(() => btn.classList.remove("is-ready-flash"), 500);
+      }
+      touchCdState.set(btn, cooling);
+    }
   }
 
   /* ═══════════════════════════════════════════════════════
