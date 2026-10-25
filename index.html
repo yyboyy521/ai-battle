@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#070b14">
   <title>AI 娘 · 破界咖啡厅</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23070b14'/%3E%3Cpath d='M18 44 32 16l14 28-14-8z' fill='%2363d9ff'/%3E%3Ccircle cx='32' cy='36' r='4' fill='%23ffd36d'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="style.css?v=63">
+  <link rel="stylesheet" href="style.css?v=64">
 </head>
 <body>
   <div class="page-atmosphere" aria-hidden="true">
@@ -43,7 +43,7 @@
         </div>
       </div>
       <div class="topbar-meta">
-        <span class="build-pill"><i class="live-dot"></i> LOCAL / ONLINE <b>v4.1.0</b></span>
+        <span class="build-pill"><i class="live-dot"></i> LOCAL / ONLINE <b>v4.2.0</b></span>
         <button class="icon-button sound-toggle" id="selectSoundBtn" type="button" aria-label="切换音效">
           <svg class="sound-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"/></svg>
           <svg class="sound-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z"/><path d="m16 9 5 5m0-5-5 5"/></svg>
@@ -214,13 +214,19 @@
           </div>
 
           <div class="launch-pane" id="aiLaunch">
-            <div class="opponent-note">
-              <span class="ai-orb" aria-hidden="true"></span>
-              <div>
+            <!-- 对手选择：五选一 + 随机 -->
+            <div class="opponent-picker" id="opponentPicker" role="radiogroup" aria-label="选择对手 AI">
+              <div class="opponent-picker-head">
+                <span class="ai-orb" aria-hidden="true"></span>
                 <small>你的对手</small>
                 <strong id="aiOpponentText">随机 AI · 轻松模式</strong>
               </div>
-              <span class="random-mark" aria-hidden="true">⟳</span>
+              <div class="opponent-options" id="opponentOptions">
+                <button type="button" class="opponent-chip is-active" data-opponent="random" aria-pressed="true" title="随机">
+                  <span class="opponent-chip-face">⟳</span>
+                  <span class="opponent-chip-name">随机</span>
+                </button>
+              </div>
             </div>
 
             <div class="difficulty-row" id="difficultyRow" role="group" aria-label="AI 强度">
@@ -321,7 +327,7 @@
         <p class="system-tagline">欢迎光临破界咖啡厅</p>
         <div class="notice-badges">
           <span>游戏版号 <b>AIA-2026-001</b></span>
-          <span>版本 <b>v4.1.0</b></span>
+          <span>版本 <b>v4.2.0</b></span>
           <span>适龄提示 <b>12+</b></span>
         </div>
         <nav class="notice-tabs" role="tablist" aria-label="须知页面">
@@ -440,7 +446,7 @@
       </nav>
       <div class="settings-rail-foot">
         <span>AI 娘 · 破界对决</span>
-        <small>v4.1.0 / LOCAL BUILD</small>
+        <small>v4.2.0 / LOCAL BUILD</small>
       </div>
 
       <div class="settings-body">
@@ -539,7 +545,7 @@
             <div class="settings-notice-meta">
               <span>游戏名称 <b>AI 娘 · 破界对决</b></span>
               <span>游戏版号 <b>AIA-2026-001</b></span>
-              <span>版本 <b>v4.1.0</b></span>
+              <span>版本 <b>v4.2.0</b></span>
               <span>作者 <b>企鹅先生</b></span>
             </div>
             <p>选择 AI 娘进行 1v1 实时对战；支持 AI 三档强度与双人联机。按键与联机步骤已收录在完整须知中。</p>
@@ -769,6 +775,6 @@
     </div>
   </section>
 
-  <script src="game.js?v=62"></script>
+  <script src="game.js?v=64"></script>
 </body>
 </html>

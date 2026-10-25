@@ -19,7 +19,7 @@
   const GRAVITY = 2200;
   const CRIT_MULT = 1.7;
   const SKILL_DODGE_FACTOR = 0.35;
-  const COUNTER_BONUS = 0.08;
+  const COUNTER_BONUS = 0.04;
   const RANGED_LIMIT = W / 2;
   const ARENA = { minX: 86, maxX: 1194, wallL: 54, wallR: 1226, top: 128 };
   // 地图：女仆咖啡厅 · 霓虹（背景图与碰撞盒共用这一份坐标）
@@ -133,13 +133,13 @@
   /* 手机端整体再降一档：AI 出手更慢、躲闪更少、决策更犹豫。
      由 touchBind 里检测到触屏时通过 AI_TOUCH_SCALE 合并进去。 */
   const AI_TOUCH_SCALE = {
-    attackRate: 1,         // 统一由难度表的 attackRate 控制（已 -30%）
+    attackRate: 0.8,       // 手机端出手频率再 -20%
     dodgeChance: 0.7,
     jumpAbove: 0.75,
-    decisionMin: 1.15,
-    decisionMax: 1.15,
-    skillLockoutMin: 1.2,
-    skillLockoutMax: 1.2
+    decisionMin: 1.2,
+    decisionMax: 1.2,
+    skillLockoutMin: 1.25,
+    skillLockoutMax: 1.25
   };
   const FONT = '"Segoe UI Variable", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
   const DISPLAY = '"Segoe UI Variable Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
@@ -182,19 +182,20 @@
       aiRange: 174,
       passive: {
         name: "开源省流",
-        desc: "生命首次低于 45% 后开启开源省流模式：此后移动速度 +10%、普攻范围 +50%、造成伤害 +15%，并获得 2 秒无敌（每场一次）。开源的孩子会自己省着用。",
-        shortDesc: "首次低于 45% 生命：移速 +10%、普攻范围 +50%、伤害 +15%，并获得 2 秒无敌。",
+        desc: "生命首次低于 45% 后开启开源省流模式：此后移动速度 +15%、普攻范围 +40%、造成伤害 +10%、受到的伤害降低 10%，并获得 2 秒无敌（每场一次）。开源的孩子会自己省着用。",
+        shortDesc: "首次低于 45% 生命：移速 +15%、普攻范围 +40%、伤害 +10%、减伤 +10%，并获得 2 秒无敌。",
         type: "deepseek",
-        speedBonus: 0.1,
-        rangeBonus: 0.5,
-        damageBonus: 0.15,
+        speedBonus: 0.15,
+        rangeBonus: 0.4,
+        damageBonus: 0.1,
+        damageReduction: 0.1,
         invulnDuration: 2
       },
       normal: {
         name: "鲸尾扫饭",
         type: "melee",
         flavor: "甩动蓝鲸长尾横扫近身目标。",
-        damage: 36,
+        damage: 35,
         cooldown: 0.46,
         windup: 0.09,
         duration: 0.29,
@@ -254,20 +255,20 @@
       aiRange: 355,
       passive: {
         name: "服务器重启",
-        desc: "生命即将耗尽时，一场战斗一次：立刻回复 15% 生命，刷新技能冷却并回复 40 TOKEN；15 秒后会强制损失 10% 最大生命。服务器繁忙，但会自己重启。",
-        shortDesc: "致命伤时：回复 15% 生命、刷新技能、+40 TOKEN；15s 后反噬 -10% 最大生命（每场一次）。",
+        desc: "生命即将耗尽时，一场战斗一次：立刻回复 15% 生命，刷新技能冷却并回复 40 TOKEN；12 秒后会强制损失 8% 最大生命。服务器繁忙，但会自己重启。",
+        shortDesc: "致命伤时：回复 15% 生命、刷新技能、+40 TOKEN；12s 后反噬 -8% 最大生命（每场一次）。",
         type: "gpt",
         reviveRatio: 0.15,
         tokenRefund: 40,
-        backlashDelay: 15,
-        backlashRatio: 0.1
+        backlashDelay: 12,
+        backlashRatio: 0.08
       },
       normal: {
         name: "白羽小作文",
         type: "projectile",
         flavor: "弹出一片纯白羽刃，沿直线讲道理。",
         damage: 32,
-        cooldown: 0.6,
+        cooldown: 0.56,
         windup: 0.11,
         duration: 0.28,
         knockback: 210,
@@ -278,7 +279,7 @@
         meme: "请稍后再试",
         flavor: "向前推出一整卷无法折叠的小作文。",
         type: "scroll",
-        cost: 50,
+        cost: 56,
         cooldown: 8.5,
         damage: 108,
         windup: 0.28,
@@ -406,7 +407,7 @@
         type: "projectile",
         flavor: "掷出一页附加条款的高速书页。",
         damage: 30,
-        cooldown: 0.56,
+        cooldown: 0.54,
         windup: 0.1,
         duration: 0.27,
         knockback: 230,
@@ -494,11 +495,11 @@
         cost: 75,
         cooldown: 18,
         buffDuration: 8,
-        damageBonus: 0.45,
+        damageBonus: 0.35,
         speedBonus: 0.35,
         attackSpeedBonus: 0.35,
         controlResist: 0.3,
-        lifesteal: 0.35,
+        lifesteal: 0.3,
         windup: 0.22,
         duration: 0.62,
         knockback: 0
@@ -720,6 +721,8 @@
 
   let selectedId = "deepseek";
   let selectedDifficulty = "easy";
+  // 对手选择：null = 随机；否则为角色 id
+  let selectedOpponentId = null;
   let selectedMode = "ai";
   let compactDescriptions = true;
   let battle = null;
@@ -1505,7 +1508,7 @@
     }
     clearResultChoiceTimer();
     setOverlay(ui.resultOverlay, false);
-    startBattle(selectedId, null, { difficulty: selectedDifficulty });
+    startBattle(selectedId, selectedOpponentId, { difficulty: selectedDifficulty });
   }
 
   function handleEndResult() {
@@ -1621,7 +1624,52 @@
     for (const button of ui.difficultyButtons) {
       button.classList.toggle("is-active", button.dataset.difficulty === level);
     }
-    ui.aiOpponentText.textContent = `随机 AI · ${AI_DIFFICULTIES[level].label}模式`;
+    refreshOpponentLabel();
+  }
+
+  /* 对手选择：生成「五个角色 + 随机」按钮 */
+  function buildOpponentPicker() {
+    const wrap = document.getElementById("opponentOptions");
+    if (!wrap) return;
+    const chips = ["<button type=\"button\" class=\"opponent-chip\" data-opponent=\"random\" aria-pressed=\"true\" title=\"随机\">"
+      + "<span class=\"opponent-chip-face\">⟳</span><span class=\"opponent-chip-name\">随机</span></button>"]
+      .concat(CHARACTERS.map((c) =>
+        `<button type="button" class="opponent-chip" data-opponent="${c.id}" aria-pressed="false" title="${c.name}">
+          <img class="opponent-chip-face" src="${c.image}" alt="">
+          <span class="opponent-chip-name">${c.name}</span>
+        </button>`));
+    wrap.innerHTML = chips.join("");
+    wrap.addEventListener("click", (event) => {
+      const chip = event.target.closest(".opponent-chip");
+      if (!chip) return;
+      setOpponent(chip.dataset.opponent);
+    });
+  }
+
+  function setOpponent(id) {
+    selectedOpponentId = (!id || id === "random") ? null : id;
+    const wrap = document.getElementById("opponentOptions");
+    if (wrap) {
+      for (const chip of wrap.querySelectorAll(".opponent-chip")) {
+        const isRandom = chip.dataset.opponent === "random";
+        const on = selectedOpponentId ? chip.dataset.opponent === selectedOpponentId : isRandom;
+        chip.classList.toggle("is-active", on);
+        chip.setAttribute("aria-pressed", on ? "true" : "false");
+      }
+    }
+    refreshOpponentLabel();
+  }
+
+  function refreshOpponentLabel() {
+    const label = ui.aiOpponentText;
+    if (!label) return;
+    const diff = AI_DIFFICULTIES[selectedDifficulty].label;
+    if (!selectedOpponentId) {
+      label.textContent = `随机 AI · ${diff}模式`;
+      return;
+    }
+    const c = BY_ID[selectedOpponentId];
+    label.textContent = `${c ? c.name : "随机"} · ${diff}模式`;
   }
 
   function showOnlineEntry() {
@@ -3083,7 +3131,7 @@
       }
       event.preventDefault();
       if (selectedMode === "ai") {
-        startBattle(selectedId, null, { difficulty: selectedDifficulty });
+        startBattle(selectedId, selectedOpponentId, { difficulty: selectedDifficulty });
       }
       return true;
     }
@@ -3895,6 +3943,14 @@
     }
 
     let passiveGuard = "";
+
+    // DeepSeek 开源省流：开启后受到伤害 -10%
+    if (target.char.id === "deepseek" && target.passiveNotified
+        && (target.char.passive.damageReduction || 0) > 0) {
+      damage = Math.round(damage * (1 - target.char.passive.damageReduction));
+      passiveGuard = "开源省流";
+    }
+
     if (target.char.id === "kimi" && target.token >= target.char.passive.tokenThreshold) {
       // 护体按伤害来源区分：近战伤害减免更高，远程伤害减免较低
       const kp = target.char.passive;
@@ -6485,7 +6541,7 @@
      ═══════════════════════════════════════════════════════ */
   ui.startBtn.addEventListener("click", () => {
     if (online || selectedMode !== "ai") return;
-    startBattle(selectedId, null, { difficulty: selectedDifficulty });
+    startBattle(selectedId, selectedOpponentId, { difficulty: selectedDifficulty });
   });
   ui.selectSoundBtn.addEventListener("click", () => AudioEngine.toggle());
   ui.battleSoundBtn.addEventListener("click", () => AudioEngine.toggle());
@@ -6601,6 +6657,8 @@
      Init
      ═══════════════════════════════════════════════════════ */
   buildRoster();
+  buildOpponentPicker();
+  setOpponent(null);
   try {
     const savedDescMode = localStorage.getItem("ai-arena-description-mode");
     if (savedDescMode === "full") compactDescriptions = false;
