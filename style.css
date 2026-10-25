@@ -10200,3 +10200,45 @@ body.is-touch .touch-pad.is-hidden {
   visibility: hidden !important;
   opacity: 0 !important;
 }
+/* ================================================================
+   v4.1.0 · 手机端战场铺满全屏
+   手机横屏通常比 16:9 更宽（如 844×390 ≈ 2.16:1），
+   原先按 16:9 等比缩放会在上下留黑边。这里让画布铺满整屏，
+   并按 1:1 像素映射渲染，视觉上更沉浸、更顺滑。
+   ================================================================ */
+@media (max-height: 481px) {
+  body.is-touch .screen-battle.is-active {
+    display: block !important;
+    padding: 0 !important;
+    background: #050a12 !important;
+  }
+
+  body.is-touch .battle-shell {
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: #050a12 !important;
+  }
+
+  /* 画布铺满容器；canvas 内部按画布像素缩放绘制（JS 里 setTransform） */
+  body.is-touch #gameCanvas {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+    display: block !important;
+  }
+
+  /* 去掉会露边的装饰层 */
+  body.is-touch .battle-vignette,
+  body.is-touch .battle-scanlines {
+    display: none !important;
+  }
+}

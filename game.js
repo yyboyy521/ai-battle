@@ -90,7 +90,9 @@
       aimY: 48,
       initialLockout: 2.8,
       skillLockoutMin: 4.2,
-      skillLockoutMax: 7.4
+      skillLockoutMax: 7.4,
+      attackRate: 0.7,
+      pressChance: 0.45
     },
     normal: {
       label: "标准",
@@ -105,7 +107,9 @@
       aimY: 34,
       initialLockout: 2.5,
       skillLockoutMin: 3.6,
-      skillLockoutMax: 6.0
+      skillLockoutMax: 6.0,
+      attackRate: 0.7,
+      pressChance: 0.45
     },
     hard: {
       label: "困难",
@@ -120,8 +124,22 @@
       aimY: 18,
       initialLockout: 1.7,
       skillLockoutMin: 2.4,
-      skillLockoutMax: 4.0
+      skillLockoutMax: 4.0,
+      attackRate: 1,
+      pressChance: 0.35
     }
+  };
+
+  /* 手机端整体再降一档：AI 出手更慢、躲闪更少、决策更犹豫。
+     由 touchBind 里检测到触屏时通过 AI_TOUCH_SCALE 合并进去。 */
+  const AI_TOUCH_SCALE = {
+    attackRate: 1,         // 统一由难度表的 attackRate 控制（已 -30%）
+    dodgeChance: 0.7,
+    jumpAbove: 0.75,
+    decisionMin: 1.15,
+    decisionMax: 1.15,
+    skillLockoutMin: 1.2,
+    skillLockoutMax: 1.2
   };
   const FONT = '"Segoe UI Variable", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
   const DISPLAY = '"Segoe UI Variable Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif';
@@ -2498,6 +2516,19 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
+
+    /* 手机端让战场铺满整屏：
+       画布显示尺寸由 CSS 撑满容器，这里用 object-fit: cover 做居中裁切，
+       逻辑坐标仍是 1280x720（命中判定与绘制全部不变），
+       只是把超出屏幕的两侧裁掉，视觉上场景占满整屏。 */
+    const isTouch = document.body.classList.contains("is-touch");
+    if (isTouch && window.innerHeight < 520) {
+      canvas.style.objectFit = "cover";
+      canvas.style.objectPosition = "center center";
+    } else {
+      canvas.style.objectFit = "";
+      canvas.style.objectPosition = "";
+    }
   }
 
   /* ═══════════════════════════════════════════════════════
@@ -2562,7 +2593,14 @@
     const enemyChar = (forcedEnemyId && forcedEnemyId !== playerChar.id && BY_ID[forcedEnemyId])
       || available[Math.floor(Math.random() * available.length)];
     const difficulty = options.difficulty && AI_DIFFICULTIES[options.difficulty] ? options.difficulty : "easy";
-    const aiConf = AI_DIFFICULTIES[difficulty];
+    // 触屏设备整体再降一档，让手机玩家不会被打得太狠
+    const isTouchNow = document.body.classList.contains("is-touch");
+    const baseConf = AI_DIFFICULTIES[difficulty];
+    const aiConf = isTouchNow
+      ? Object.assign({}, baseConf, Object.fromEntries(
+        Object.entries(AI_TOUCH_SCALE).map(([k, v]) => [k, (baseConf[k] ?? 1) * v])
+      ))
+      : baseConf;
 
     const player = createFighter(playerChar, { x: 270, facing: 1, isAI: false });
     const enemy = createFighter(enemyChar, { x: 1010, facing: -1, isAI: true });
@@ -4610,22 +4648,30 @@
         return headedAtMe && Math.abs(p.x - me.x) < 320;
       }) || b.strikes.some((s) => s.type === "beam" && s.owner !== me && !s.hitDone);
       const foeCastingD = !!foe.action && foe.action.kind === "skill";
+      /* 冲刺方向：
+         - 面对弹幕/施法时才后撤，而且只在"确实贴脸"或"血量偏低"时后撤，
+           否则改为向前冲，避免 AI 整局只会往后退；
+         - 距离远时优先主动接近，不做无意义的后撤。 */
       let dashDirD = 0;
-      if (dangerD || foeCastingD) {
-        dashDirD = -towardD;
+      const wantsEscape = dangerD || foeCastingD;
+      if (wantsEscape && (distD < 220 || me.hp < me.char.hpMax * 0.35)) {
+        dashDirD = -towardD;                        // 贴脸受威胁才后撤
       } else if (isMeleeD && distD > prefD + 20) {
-        dashDirD = towardD;
-      } else if (!isMeleeD && distD < prefD - 80) {
-        dashDirD = -towardD;
+        dashDirD = towardD;                         // 近战拉开距离时冲上去
+      } else if (!isMeleeD && distD > prefD + 60) {
+        dashDirD = towardD;                         // 远程拉太远时主动靠近
+      } else if (!isMeleeD && distD < prefD - 110 && !wantsEscape) {
+        dashDirD = -towardD;                        // 只有被贴身且无威胁时小幅脱离
       }
-      // 冲刺触发率：0.9 → 0.45（降低 50%），让 AI 不再靠冲刺压制玩家
+      // 冲刺触发率：0.45（此前 0.9）
       if (dashDirD !== 0 && Math.random() < 0.45) {
         me.facing = dashDirD;
         tryDash(me, b);
       }
     }
 
-    // 普攻同样按帧判定：射程内且 CD 好了就立刻出，不再等决策拍。
+    /* 普攻同样按帧判定：射程内且 CD 好了就出手。
+       手机端降低出手频率（attackRate < 1），让操作负担更小。 */
     if (me.normalCd <= 0 && !me.action && me.stun <= 0) {
       const dxA = foe.x - me.x;
       const distA = Math.abs(dxA);
@@ -4634,7 +4680,8 @@
         ? nA.range + 28
         : RANGED_LIMIT * (1 + (me.char.attackRangeBonus || 0)) - 10;
       const chanceA = nA.type === "melee" ? ai.conf.attackMelee : ai.conf.attackRanged;
-      if (distA < rangeA && Math.random() < chanceA * 0.5) {
+      const rate = ai.conf.attackRate ?? 1;
+      if (distA < rangeA && Math.random() < chanceA * 0.5 * rate) {
         aimAt(me, foe);
         tryNormal(me, b);
       }
@@ -4668,11 +4715,23 @@
     }
 
     let move = 0;
-    if (dist > pref + 50) {
+    /* 移动意图：
+       - 太远 → 靠近；
+       - 太近 → 后撤，但只撤到舒适距离就停，不会一直贴边后退；
+       - 远程角色在"中等距离"时也会主动压上，避免整局只躲不打。 */
+    const isMeleeM = me.char.normal.type === "melee";
+    const tooFar = dist > pref + 50;
+    const tooClose = dist < pref - (isMeleeM ? 40 : 95);
+    const midRange = !tooFar && !tooClose;
+    if (tooFar) {
       move = toward;
-    } else if (dist < pref - 65) {
-      move = -toward;
-    } else if (Math.random() < 0.2) {
+    } else if (tooClose) {
+      // 远程被贴身时才后退；近战贴身本来就要打，不退
+      move = isMeleeM ? 0 : -toward;
+    } else if (midRange && !isMeleeM && Math.random() < (ai.conf.pressChance ?? 0.35)) {
+      // 远程角色偶尔主动前压
+      move = toward;
+    } else if (!isMeleeM && Math.random() < 0.15) {
       move = Math.random() < 0.5 ? -1 : 1;
       ai.strafe = move;
     } else {
@@ -4695,13 +4754,14 @@
     }
 
     const normal = me.char.normal;
+    const atkRate = ai.conf.attackRate ?? 1;
     if (me.normalCd <= 0 && !me.action && me.stun <= 0) {
       const normalRange = normal.type === "melee"
         ? normal.range + 28
         : RANGED_LIMIT * (1 + (me.char.attackRangeBonus || 0)) - 10;
       const inNormalRange = dist < normalRange;
       const attackChance = normal.type === "melee" ? conf.attackMelee : conf.attackRanged;
-      if (inNormalRange && Math.random() < attackChance) {
+      if (inNormalRange && Math.random() < attackChance * atkRate) {
         tryNormal(me, b);
       }
     }
@@ -4717,7 +4777,7 @@
       else if (skill.type === "milk") inSkillRange = dist < 620 && me.milkTimer <= 0;
       else if (skill.type === "bubbles") inSkillRange = dist < 660;
 
-      if (inSkillRange && Math.random() < conf.skillChance) {
+      if (inSkillRange && Math.random() < conf.skillChance * atkRate) {
         if (trySkill(me, b)) ai.skillLockout = rand(conf.skillLockoutMin, conf.skillLockoutMax);
       }
     }
