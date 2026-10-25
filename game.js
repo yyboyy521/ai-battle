@@ -164,20 +164,20 @@
       aiRange: 174,
       passive: {
         name: "开源省流",
-        desc: "生命首次低于 45% 后开启开源省流模式：此后移动速度 +10%、普攻范围 +50%、造成伤害 +15%，并获得 1 秒无敌（每场一次）。开源的孩子会自己省着用。",
-        shortDesc: "首次低于 45% 生命：移速 +10%、普攻范围 +50%、伤害 +15%，并获得 1 秒无敌。",
+        desc: "生命首次低于 45% 后开启开源省流模式：此后移动速度 +10%、普攻范围 +50%、造成伤害 +15%，并获得 2 秒无敌（每场一次）。开源的孩子会自己省着用。",
+        shortDesc: "首次低于 45% 生命：移速 +10%、普攻范围 +50%、伤害 +15%，并获得 2 秒无敌。",
         type: "deepseek",
         speedBonus: 0.1,
         rangeBonus: 0.5,
         damageBonus: 0.15,
-        invulnDuration: 1
+        invulnDuration: 2
       },
       normal: {
         name: "鲸尾扫饭",
         type: "melee",
         flavor: "甩动蓝鲸长尾横扫近身目标。",
         damage: 36,
-        cooldown: 0.5,
+        cooldown: 0.46,
         windup: 0.09,
         duration: 0.29,
         range: 210,
@@ -197,6 +197,9 @@
         warning: 0.75,
         windup: 0.34,
         duration: 0.78,
+        // 命中的敌人减速 50%，持续 1.5 秒（吃到撑，走不动）
+        hitSlowFactor: 0.5,
+        hitSlowDuration: 1.5,
         knockback: 380
       }
     },
@@ -246,7 +249,7 @@
         type: "projectile",
         flavor: "弹出一片纯白羽刃，沿直线讲道理。",
         damage: 32,
-        cooldown: 0.62,
+        cooldown: 0.6,
         windup: 0.11,
         duration: 0.28,
         knockback: 210,
@@ -317,7 +320,7 @@
         type: "projectile",
         flavor: "甩出一枚轻盈的月音符，命中后会留在记忆里。",
         damage: 27,
-        cooldown: 0.37,
+        cooldown: 0.43,
         windup: 0.08,
         duration: 0.20,
         knockback: 180,
@@ -459,7 +462,7 @@
         type: "melee",
         flavor: "用圆滚滚的身体发起不讲道理的短距离冲撞。",
         damage: 29,
-        cooldown: 0.36,
+        cooldown: 0.4,
         windup: 0.06,
         duration: 0.24,
         range: 133,
@@ -503,8 +506,8 @@
 
     switch (s.type) {
       case "rice":
-        s.desc = `${s.flavor} ${s.warning.toFixed(2)} 秒预警后砸落，横向 ${s.bowlCount} 碗互不重叠，每碗对 ${s.radius}px 范围造成 ${s.damage} 点伤害；同一目标至多被一碗命中。未命中的白饭会留在原地 1 秒，DeepSeek 触碰后回复 30 点生命。施放需对手位于半场 ${RANGED_LIMIT}px 内。消耗 ${s.cost} TOKEN，冷却 ${s.cooldown} 秒。技能不暴击。`;
-        s.shortDesc = `${s.damage} 伤害 × ${s.bowlCount} 碗 · 范围 ${s.radius}px · 未命中留饭回血 · ${s.cost} TOKEN / CD ${s.cooldown}s`;
+        s.desc = `${s.flavor} ${s.warning.toFixed(2)} 秒预警后砸落，横向 ${s.bowlCount} 碗互不重叠，每碗对 ${s.radius}px 范围造成 ${s.damage} 点伤害；同一目标至多被一碗命中。命中的敌人移速降低 ${Math.round((s.hitSlowFactor || 0) * 100)}%，持续 ${s.hitSlowDuration} 秒。未命中的白饭会留在原地 1 秒，DeepSeek 触碰后回复 30 点生命。施放需对手位于半场 ${RANGED_LIMIT}px 内。消耗 ${s.cost} TOKEN，冷却 ${s.cooldown} 秒。技能不暴击。`;
+        s.shortDesc = `${s.damage} 伤害 × ${s.bowlCount} 碗 · 范围 ${s.radius}px · 命中减速 ${Math.round((s.hitSlowFactor || 0) * 100)}%/${s.hitSlowDuration}s · ${s.cost} TOKEN`;
         break;
       case "scroll":
         s.desc = `${s.flavor} 卷轴飞行速度提升 50%，命中造成 ${s.damage} 点伤害与更强击退。施放后强化下 3 次普攻：射程 +60%、击退 +25%；并获得 ${s.lifestealDuration} 秒 ${Math.round(s.lifesteal * 100)}% 吸血。施放需对手位于半场 ${RANGED_LIMIT}px 内。消耗 ${s.cost} TOKEN，冷却 ${s.cooldown} 秒。技能不暴击。`;
@@ -3523,7 +3526,10 @@
           color: "#ffd97e",
           hitDone: false,
           group,
-          center: i === (count - 1) / 2
+          center: i === (count - 1) / 2,
+          // 技能命中附加减速
+          hitSlowFactor: s.hitSlowFactor || 0,
+          hitSlowDuration: s.hitSlowDuration || 0
         });
       }
     } else if (s.type === "ban") {
@@ -4545,6 +4551,12 @@
         ranged: true
       });
       if (s.group) s.group.hitDone = true;
+      // 技能命中附加减速（白饭管饱：-50% 移速，1.5 秒）
+      if (hitApplied && s.hitSlowFactor > 0) {
+        target.slowTimer = Math.max(target.slowTimer, s.hitSlowDuration);
+        target.slowFactor = Math.max(target.slowFactor || 0, s.hitSlowFactor);
+        addFloat(b, target.x, target.y - 128, "吃撑了 · 减速", "#ffd97e", 14, 0.95);
+      }
       if (s.type === "rice" && !hitApplied) {
         spawnRicePickup(b, s);
       }
@@ -6350,9 +6362,29 @@
      Main loop
      ═══════════════════════════════════════════════════════ */
   let lastFrame = performance.now();
+  /* 触屏操作台的显隐：
+     结算 / 暂停 / 须知 / 设置等浮层打开时，必须收起操作键，
+     避免"再来一局"界面上还盖着攻击键。 */
+  let lastPadHidden = null;
+  function syncTouchPadVisibility() {
+    const pad = document.getElementById("touchPad");
+    if (!pad) return;
+    const blocked = (battle && battle.phase === "over")
+      || (battle && battle.phase === "paused")
+      || !!document.querySelector(".overlay.is-open, .dialog-layer.is-open");
+    if (blocked === lastPadHidden) return;
+    lastPadHidden = blocked;
+    pad.classList.toggle("is-hidden", blocked);
+    if (blocked && typeof window.__releaseAllTouch === "function") {
+      window.__releaseAllTouch();
+    }
+  }
+
   function loop(now) {
     const dt = Math.min(Math.max((now - lastFrame) / 1000, 0), 0.033);
     lastFrame = now;
+
+    syncTouchPadVisibility();
 
     if (battle) {
       if (battle.online && battle.online.role === "guest") {

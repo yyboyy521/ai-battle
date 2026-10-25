@@ -10100,3 +10100,103 @@ body.is-touch.is-battling {
   inset: 0;
   overflow: hidden;
 }
+/* ================================================================
+   v4.0.0 · 手机端三处修正
+   ① 结算/暂停等浮层打开时隐藏触屏操作键
+   ② 选人页：右侧阵容模块与下方开始模块不再重叠
+   ③ 右侧角色立绘放大且不出框
+   ================================================================ */
+
+/* ① 浮层打开时收起触屏按键（结算"再来一局"、暂停、须知等） */
+body.is-touch .overlay.is-open ~ .touch-pad,
+body.is-touch.is-result .touch-pad,
+body.is-touch.is-paused .touch-pad,
+body.is-touch.is-dialog .touch-pad {
+  display: none !important;
+}
+
+/* 结算浮层盖住时，操作台不允许接收点击 */
+body.is-touch .result-overlay.is-open ~ .touch-pad,
+body.is-touch .pause-overlay.is-open ~ .touch-pad {
+  pointer-events: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+@media (max-height: 481px) {
+  /* ② 阵容面板：内部改为纵向弹性，角色卡与开始区各自占位，互不挤压 */
+  body.is-touch .roster-panel {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    padding: 8px 10px !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body.is-touch .roster-list {
+    flex: 0 0 auto !important;
+    height: 62px !important;
+    min-height: 62px !important;
+  }
+
+  body.is-touch .roster-card img {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  /* 开始区：占满剩余高度，超出则内部滚动，绝不压到角色卡上 */
+  body.is-touch .launch-panel {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5px !important;
+    margin: 0 !important;
+    padding-right: 2px;
+  }
+
+  body.is-touch .launch-panel::-webkit-scrollbar { width: 4px; }
+  body.is-touch .launch-panel::-webkit-scrollbar-thumb {
+    background: rgba(255, 158, 203, .4);
+    border-radius: 2px;
+  }
+
+  body.is-touch .mode-switch {
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+  }
+
+  body.is-touch .mode-button {
+    min-height: 30px !important;
+    font-size: 11px !important;
+  }
+
+  body.is-touch .start-button {
+    flex: 0 0 auto !important;
+    min-height: 44px !important;
+    margin-top: 2px !important;
+  }
+
+  /* ③ 立绘放大到 150px，contain 保证不出框 */
+  body.is-touch .profile-art {
+    width: 150px !important;
+    min-width: 150px !important;
+    max-width: 150px !important;
+  }
+
+  body.is-touch .profile-art #heroImg {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    object-position: center bottom !important;
+  }
+}
+/* 触屏操作台隐藏态（结算 / 暂停 / 弹窗打开时） */
+body.is-touch .touch-pad.is-hidden {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
